@@ -6,4 +6,4 @@ The code, however, is quite janky and hacky and I would not try to PR this into 
 
 **Installation**
 
-Exract ootbijmqwt.apworld into `lib\worlds\` in your Archipelago installation folder (or just `worlds\` if running from source).
+If you wish to be able to *generate* OoTbijMQWT games, you should exract ootbijmqwt.apworld into `lib\worlds\` in your Archipelago installation folder (or just `worlds\` if running from source). Other players need only download the yaml template.
