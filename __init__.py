@@ -62,7 +62,6 @@ always_pool += ["Song of Time", "Zeldas Lullaby", "Fire Arrows", "Bow", "Ice Arr
 useful = ["Hylian Shield", "Mirror Shield"]
 filler = ["Ice Arrows", "Light Arrows", "Megaton Hammer", "Lens of Truth", "Progressive Strength Upgrade", "Goron Tunic"]
 
-#not sure if the boss clears are still necessary?
 final_clears = ['Skull Mask from Market Mask Shop', 'Mask of Truth from Market Mask Shop', 'Queen Gohma', 'King Dodongo',
                 'Barinade', 'Phantom Ganon', 'Volvagia', 'Bongo Bongo', 'Twinrova',
                 'Forest Trial Clear from Ganons Castle Forest Trial Ending',
@@ -82,6 +81,7 @@ class StartMode(Choice):
     option_burger_king = 0
     option_iron_boots = 1
     option_guard_house = 2
+    default = 2
 
 
 class WarpSongs(Toggle):
@@ -112,7 +112,7 @@ class TokensInPool(Range):
     display_name = "Tokens in Pool"
     range_start = 10
     range_end = 70
-    default = 70
+    default = 50
 
 
 class LocalTokens(Toggle):
@@ -373,16 +373,24 @@ class OOTBIJMQWTWorld(OOTWorld):
             c1.connect(world.get_region(c2.vanilla_connected_region))
             c1.replaces = c2
 
-        if multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
-            multiworld.early_items[world.player]["Iron Boots"] = 1
-            if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
-                multiworld.early_items[world.player]["Zora Tunic"] = 1
-        else:
-            multiworld.early_items[world.player]["Progressive Hookshot"] = 2
-            multiworld.early_items[world.player]["Small Key (Water Temple)"] = 1
+        if multiworld.start_mode[world.player] != "iron_boots":
+            if multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
+                multiworld.early_items[world.player]["Iron Boots"] = 1
+                if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
+                    multiworld.early_items[world.player]["Zora Tunic"] = 1
+            else:
+                multiworld.early_items[world.player]["Progressive Hookshot"] = 2
+                multiworld.early_items[world.player]["Small Key (Water Temple)"] = 1
 
     def get_entrance(self, entrance):
         return self.multiworld.get_entrance(entrance, self.player)
+
+    def extend_hint_information(self, er_hint_data: dict):
+        er_hint_data[self.player] = {}
+        if self.multiworld.shuffle_warp_songs[self.player]:
+            for entrance in [self.multiworld.get_entrance(entrance, self.player) for entrance in warp_song_connectors]:
+                for location in entrance.connected_region.locations:
+                    er_hint_data[self.player][location.address] = entrance.name.split(" -> ")[0]
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
